@@ -28,6 +28,7 @@ end
 
 function rpc.call(cmd, data)
     local cmdId = math.random(0,65535)
+    print(cmdId)
     modem.broadcast(rpc.PORT_SERVER, cmdId, cmd, data)
     while rpc.answers[cmdId] == nil do
         print(rpc.answers[cmdId])
