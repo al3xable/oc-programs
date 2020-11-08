@@ -31,6 +31,7 @@ function rpc.call(cmd, data, timeout)
     end
     --local cmdId = math.random(0,65535)
     local cmdId = 255
+    local timeoutClk = 0
     local resultPong, resultCode, resultData = false, nil, nil
 
     print(cmdId)
@@ -58,9 +59,18 @@ function rpc.call(cmd, data, timeout)
 
     while resultCode == nil do
         print(tostring(resultPong) .. '-' .. tostring(resultCode) .. '-' .. tostring(resultData))
-        os.sleep(1)
+
+        if timeoutClk >= timeout then
+            break
+        end
+
+        local sleep = 0.1
+        os.sleep(sleep)
+        timeoutClk = timeoutClk + sleep
     end
-    return
+    puller:stop()
+
+    return resultPong, resultCode, resultData
 end
 
 return rpc
