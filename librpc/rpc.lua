@@ -68,7 +68,7 @@ function rpc.call(cmd, data, timeout)
         os.sleep(sleep)
         timeoutClk = timeoutClk + sleep
     end
-    puller:stop()
+    puller:kill()
 
     return resultPong, resultCode, resultData
 end
