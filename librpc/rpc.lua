@@ -58,8 +58,6 @@ function rpc.call(cmd, data, timeout)
     modem.broadcast(rpc.PORT_SERVER, cmdId, cmd, data)
 
     while resultCode == nil do
-        print(tostring(resultPong) .. '-' .. tostring(resultCode) .. '-' .. tostring(resultData))
-
         if timeoutClk >= timeout then
             break
         end
