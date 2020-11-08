@@ -39,11 +39,11 @@ function rpc.call(cmd, data, timeout)
         while true do
             local _, receiverAddress, senderAddress, port, _, eCmdId, eCode, eData = event.pull('modem_message')
             if eCmdId == cmdId then
-                if eCode == rpc.RPL_CMD_DATA then
+                if eCode == rpc.RPL_CMD_RECIEVED then
                     resultPong = true
-                elseif eCode == rpc.RPL_CMD_DATA then
+                elseif eCode == rpc.RPL_CMD_RESULT then
                     resultCode = eData
-                elseif eCode == rpc.RPL_CMD_ then
+                elseif eCode == rpc.RPL_CMD_DATA then
                     if resultData == nil then
                         resultData = eData
                     else
