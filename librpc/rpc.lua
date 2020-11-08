@@ -22,10 +22,6 @@ rpc.RPL_CMD_RESULT = 1 -- command execution result code
 rpc.RPL_CMD_DATA = 2 -- command data
 
 function rpc.clientOpen()
-    rpc.clientPuller = thread.create(function()
-        local receiverAddress, senderAddress, port, distance, cmdId, code, data = event.pull('modem_message')
-        rpc.answers[cmdId] = 123
-    end)
     return modem.isOpen(rpc.PORT_CLIENT) or modem.open(rpc.PORT_CLIENT)
 end
 
@@ -34,19 +30,25 @@ function rpc.call(cmd, data, timeout)
         timeout = 30
     end
     local cmdId = math.random(0,65535)
+    local code, data
 
     print(cmdId)
 
+    local puller = thread.create(function()
+        while true do
+            local receiverAddress, senderAddress, port, _, _cmdId, _code, _data = event.pull('modem_message')
+            print(_cmdId .. ' - ' .. tostring(_code) .. ' - ' .. tostring(_data))
+            data = 123
+        end
+    end)
+
     modem.broadcast(rpc.PORT_SERVER, cmdId, cmd, data)
-    while rpc.answers[cmdId] == nil do
-        print(rpc.answers[cmdId])
+
+    while code == nil do
+        print(tostring(code))
         os.sleep(0.1)
     end
-    print(rpc.answers[cmdId])
-end
-
-function rpc.clientHandler(receiverAddress, senderAddress, port, distance, cmdId, code, data)
-    rpc.answers[cmdId] = 111
+    return
 end
 
 return rpc
