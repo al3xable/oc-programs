@@ -29,24 +29,36 @@ function rpc.call(cmd, data, timeout)
     if timeout == nil then
         timeout = 30
     end
-    local cmdId = math.random(0,65535)
-    local code, data
+    --local cmdId = math.random(0,65535)
+    local cmdId = 255
+    local resultPong, resultCode, resultData = false, nil, nil
 
     print(cmdId)
 
     local puller = thread.create(function()
         while true do
-            local receiverAddress, senderAddress, port, _, _cmdId, _code, _data = event.pull('modem_message')
-            print(_cmdId .. ' - ' .. tostring(_code) .. ' - ' .. tostring(_data))
-            data = 123
+            local _, receiverAddress, senderAddress, port, _, eCmdId, eCode, eData = event.pull('modem_message')
+            if eCmdId == cmdId then
+                if eCode == rpc.RPL_CMD_DATA then
+                    resultPong = true
+                elseif eCode == rpc.RPL_CMD_DATA then
+                    resultCode = eData
+                elseif eCode == rpc.RPL_CMD_ then
+                    if resultData == nil then
+                        resultData = eData
+                    else
+                        resultData = resultData .. eData
+                    end
+                end
+            end
         end
     end)
 
     modem.broadcast(rpc.PORT_SERVER, cmdId, cmd, data)
 
-    while code == nil do
-        print(tostring(code))
-        os.sleep(0.1)
+    while resultCode == nil do
+        print(tostring(resultPong) .. '-' .. tostring(resultCode) .. '-' .. tostring(resultData))
+        os.sleep(1)
     end
     return
 end
