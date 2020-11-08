@@ -6,6 +6,8 @@ local modem = component.modem
 
 local rpc = {}
 
+rpc.answers = {}
+
 -- Ports
 rpc.PORT_CLIENT = 9501
 rpc.PORT_SERVER = 9500
@@ -25,11 +27,15 @@ function rpc.clientOpen()
 end
 
 function rpc.call(cmd, data)
-    modem.broadcast(rpc.PORT_SERVER, math.random(0,65535), cmd, data)
+    local cmdId = math.random(0,65535)
+    modem.broadcast(rpc.PORT_SERVER, cmdId, cmd, data)
+    while rpc.answers[cmdId] == nil do
+    end
+    print(rpc.answers[cmdId])
 end
 
-function rpc.clientHandler(receiverAddress, senderAddress, port, distance, data)
-    print(recieverAddress .. ' ' .. senderAddress)
+function rpc.clientHandler(receiverAddress, senderAddress, port, distance, cmdId, code, data)
+    rpc.answers[cmdId] = 111
 end
 
 return rpc
