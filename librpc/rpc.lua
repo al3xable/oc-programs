@@ -64,7 +64,7 @@ function rpc.callBroadcast(cmd, data, timeout)
     os.sleep(timeout)
     puller:kill()
 
-    for key,value in results do
+    for key,_ in pairs(results) do
         results[key].resultData = table.concat(results[key].resultData, '')
     end
 
