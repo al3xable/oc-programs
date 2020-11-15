@@ -64,6 +64,10 @@ function rpc.callBroadcast(cmd, data, timeout)
     os.sleep(timeout)
     puller:kill()
 
+    for key,value in results do
+        results[key].resultData = table.concat(results[key].resultData, '')
+    end
+
     return cmdId, results
 end
 
@@ -77,7 +81,7 @@ function rpc.call(address, cmd, data, timeout)
 
     local puller = thread.create(function()
         while true do
-            local _, receiverAddress, senderAddress, port, _, eCmdId, eCode, eData = event.pull('modem_message')
+            local _, receiverAddress, senderAddress, port, _, eCmdId, eCode, eChunk, eData = event.pull('modem_message')
             if port == rpc.PORT_CLIENT and eCmdId == cmdId then
                 if eCode == rpc.RPL_CMD_RECIEVED then
                     resultPong = true
@@ -85,10 +89,9 @@ function rpc.call(address, cmd, data, timeout)
                     resultCode = eData
                 elseif eCode == rpc.RPL_CMD_DATA then
                     if resultData == nil then
-                        resultData = eData
-                    else
-                        resultData = resultData .. eData
+                        resultData = {}
                     end
+                    resultData[eChunk] = eData
                 end
             end
         end
@@ -107,6 +110,7 @@ function rpc.call(address, cmd, data, timeout)
     end
     puller:kill()
 
+    resultData = table.concat(resultData, '')
     return cmdId, resultPong, resultCode, resultData
 end
 
